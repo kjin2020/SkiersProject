@@ -8,7 +8,7 @@ if project_root not in sys.path:
 from utils.load_data import load_json
 from utils.dtw import compare_selected_cycles, extract_multivariate_series
 from utils.feedback_utils import *
-from utils.nets import LSTMNet, SimpleMLP
+from utils.nets import LSTMNet, SimpleMLP, load_classifier_checkpoint
 from utils.config import update_config
 from utils.split_cycles import split_into_cycles
 from utils.preprocess_signals import *
@@ -74,7 +74,7 @@ def main():
 
     # Load the checkpoint to the model as we need it for certain data
     print("Loading Model...")
-    checkpoint = torch.load(run_args.CLS_GEAR.MODEL_PATH, map_location=device)
+    checkpoint = load_classifier_checkpoint(run_args.CLS_GEAR.MODEL_PATH, map_location=device)
     
     # Extract the state_dict and custom parameters
     state_dict = checkpoint["state_dict"]

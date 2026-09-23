@@ -6,6 +6,7 @@
 import torch
 import torch.nn as nn
 from .builder import SPPE
+from .imagenet_resnet import imagenet_resnet
 from .layers.Resnet import ResNet
 from .layers.SE_Resnet import SEResnet
 from .layers.ShuffleResnet import ShuffleResnet
@@ -48,17 +49,16 @@ class FastPose_DUC_Dense(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
         # Imagenet pretrain model
-        import torchvision.models as tm
         if cfg['NUM_LAYERS'] == 152:
             ''' Load pretrained model '''
-            x = tm.resnet152(pretrained=True)
+            x = imagenet_resnet(152)
         elif cfg['NUM_LAYERS'] == 101:
             ''' Load pretrained model '''
-            x = tm.resnet101(pretrained=True)
+            x = imagenet_resnet(101)
         elif cfg['NUM_LAYERS'] == 50:
-            x = tm.resnet50(pretrained=True)
+            x = imagenet_resnet(50)
         elif cfg['NUM_LAYERS'] == 18:
-            x = tm.resnet18(pretrained=True)
+            x = imagenet_resnet(18)
         else:
             raise NotImplementedError
         model_state = self.preact.state_dict()

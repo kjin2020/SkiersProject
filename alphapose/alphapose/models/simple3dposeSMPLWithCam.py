@@ -5,6 +5,7 @@ from easydict import EasyDict as edict
 from torch.nn import functional as F
 
 from .builder import SPPE
+from .imagenet_resnet import imagenet_resnet
 from .layers.Resnet import ResNet
 from .layers.smpl.SMPL import SMPL_layer
 
@@ -46,19 +47,18 @@ class Simple3DPoseBaseSMPLCam(nn.Module):
         self.preact = backbone(f"resnet{kwargs['NUM_LAYERS']}")
 
         # Imagenet pretrain model
-        import torchvision.models as tm
         if kwargs['NUM_LAYERS'] == 101:
             ''' Load pretrained model '''
-            x = tm.resnet101(pretrained=True)
+            x = imagenet_resnet(101)
             self.feature_channel = 2048
         elif kwargs['NUM_LAYERS'] == 50:
-            x = tm.resnet50(pretrained=True)
+            x = imagenet_resnet(50)
             self.feature_channel = 2048
         elif kwargs['NUM_LAYERS'] == 34:
-            x = tm.resnet34(pretrained=True)
+            x = imagenet_resnet(34)
             self.feature_channel = 512
         elif kwargs['NUM_LAYERS'] == 18:
-            x = tm.resnet18(pretrained=True)
+            x = imagenet_resnet(18)
             self.feature_channel = 512
         else:
             raise NotImplementedError

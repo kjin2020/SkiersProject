@@ -18,7 +18,7 @@ from datetime import datetime
 import seaborn as sns
 
 from utils.preprocess_signals import pad_sequences, normalize_full_signal, normalize_per_timestamp, replace_nan_with_first_value, gaussian_filter1d
-from utils.nets import LSTMNet, SimpleMLP
+from utils.nets import LSTMNet, SimpleMLP, load_classifier_checkpoint
 from utils.CustomDataset import CustomDataset
 from utils.training_utils import validation, initialize_loss
 
@@ -34,7 +34,7 @@ def main():
     print(f"Device = {device}")
     # Load the checkpoint to the model as we need it for certain data
     print("Loading Model...")
-    checkpoint = torch.load(MODEL_PATH, map_location=device)
+    checkpoint = load_classifier_checkpoint(MODEL_PATH, map_location=device)
     
     # Extract the state_dict and custom parameters
     state_dict = checkpoint["state_dict"]
