@@ -6,6 +6,7 @@
 import torch.nn as nn
 
 from .builder import SPPE
+from .imagenet_resnet import imagenet_resnet
 from .layers.DUC import DUC
 from .layers.SE_Resnet import SEResnet
 
@@ -29,9 +30,8 @@ class FastPose(nn.Module):
             self.preact = SEResnet(f"resnet{cfg['NUM_LAYERS']}")
 
         # Imagenet pretrain model
-        import torchvision.models as tm   # noqa: F401,F403
         assert cfg['NUM_LAYERS'] in [18, 34, 50, 101, 152]
-        x = eval(f"tm.resnet{cfg['NUM_LAYERS']}(pretrained=True)")
+        x = imagenet_resnet(cfg['NUM_LAYERS'])
 
         model_state = self.preact.state_dict()
         state = {k: v for k, v in x.state_dict().items()

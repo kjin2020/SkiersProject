@@ -1,3 +1,5 @@
+import inspect
+
 import torch.nn as nn
 import torch
 
@@ -46,3 +48,18 @@ class LSTMNet(nn.Module):
         output = self.fc(output)  # (batch_size, output_size)
         
         return output
+
+
+def load_classifier_checkpoint(path, map_location=None):
+    """
+    Loads a gear classifier checkpoint written by save_model().
+
+    Besides the state_dict the checkpoint holds custom_params (numpy arrays,
+    an EasyDict of labels). torch >= 2.6 loads with weights_only=True by default
+    and rejects those, so full unpickling is asked for explicitly; torch < 1.13
+    has no weights_only argument and always unpickles fully.
+    Only use this on checkpoints you trust, e.g. the ones in pretrained_models/.
+    """
+    if "weights_only" in inspect.signature(torch.load).parameters:
+        return torch.load(path, map_location=map_location, weights_only=False)
+    return torch.load(path, map_location=map_location)

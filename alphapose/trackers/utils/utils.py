@@ -1,4 +1,5 @@
 import glob
+import inspect
 import random
 import time
 import os
@@ -670,13 +671,17 @@ def load_checkpoint(fpath):
     if not osp.exists(fpath):
         raise FileNotFoundError('File is not found at "{}"'.format(fpath))
     map_location = None if torch.cuda.is_available() else 'cpu'
+    # torch >= 2.6 defaults to weights_only=True, which rejects checkpoints that
+    # carry more than tensors; keep the full unpickling older torch always did
+    # (torch < 1.13 has no weights_only argument).
+    load_kwargs = {'weights_only': False} if 'weights_only' in inspect.signature(torch.load).parameters else {}
     try:
-        checkpoint = torch.load(fpath, map_location=map_location)
+        checkpoint = torch.load(fpath, map_location=map_location, **load_kwargs)
     except UnicodeDecodeError:
         pickle.load = partial(pickle.load, encoding="latin1")
         pickle.Unpickler = partial(pickle.Unpickler, encoding="latin1")
         checkpoint = torch.load(
-            fpath, pickle_module=pickle, map_location=map_location
+            fpath, pickle_module=pickle, map_location=map_location, **load_kwargs
         )
     except Exception:
         print('Unable to load checkpoint from "{}"'.format(fpath))
