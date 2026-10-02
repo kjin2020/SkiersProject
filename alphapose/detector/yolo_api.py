@@ -23,8 +23,16 @@ from detector.apis import BaseDetector
 #only windows visual studio 2013 ~2017 support compile c/cuda extensions
 #If you force to compile extension on Windows and ensure appropriate visual studio
 #is intalled, you can try to use these ext_modules.
-if platform.system() != 'Windows':
+# The compiled NMS extension (detector/nms) is optional: torchvision's nms implements the same
+# greedy suppression and is used when the extension is not built (e.g. CPU-only Linux installs).
+try:
     from detector.nms import nms_wrapper
+except ImportError:
+    nms_wrapper = None
+try:
+    from torchvision.ops import nms as torchvision_nms
+except ImportError:
+    torchvision_nms = None
 
 
 class YOLODetector(BaseDetector):
@@ -197,13 +205,16 @@ class YOLODetector(BaseDetector):
 
                 #if nms has to be done
                 if nms:
-                    if platform.system() != 'Windows':
+                    if nms_wrapper is not None:
                         #We use faster rcnn implementation of nms (soft nms is optional)
                         nms_op = getattr(nms_wrapper, 'nms')
                         #nms_op input:(n,(x1,y1,x2,y2,c))
                         #nms_op output: input[inds,:], inds
                         _, inds = nms_op(image_pred_class[:,:5], nms_conf)
 
+                        image_pred_class = image_pred_class[inds]
+                    elif torchvision_nms is not None:
+                        inds = torchvision_nms(image_pred_class[:, :4], image_pred_class[:, 4], nms_conf)
                         image_pred_class = image_pred_class[inds]
                     else:
                         # Perform non-maximum suppression

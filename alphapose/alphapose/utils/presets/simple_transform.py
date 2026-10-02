@@ -18,8 +18,12 @@ from ..transforms import (addDPG, affine_transform, flip_joints_3d,
 # Only windows visual studio 2013 ~2017 support compile c/cuda extensions
 # If you force to compile extension on Windows and ensure appropriate visual studio
 # is intalled, you can try to use these ext_modules.
-if platform.system() != 'Windows':
+# RoIAlign is a compiled CUDA extension that only align_transform() needs. Inference goes
+# through test_transform(), so the module must import even when the extension is not built.
+try:
     from ..roi_align import RoIAlign
+except ImportError:
+    RoIAlign = None
 
 
 class SimpleTransform(object):
@@ -76,7 +80,7 @@ class SimpleTransform(object):
 
             self.upper_body_ids = dataset.upper_body_ids
             self.lower_body_ids = dataset.lower_body_ids
-        if platform.system() != 'Windows':
+        if RoIAlign is not None:
             self.roi_align = RoIAlign(self._input_size, sample_num=-1)
             if gpu_device is not None:
                 self.roi_align = self.roi_align.to(gpu_device)

@@ -7,7 +7,6 @@
 import os
 
 import numpy as np
-from tkinter import _flatten
 
 from alphapose.alphapose.models.builder import DATASET
 from alphapose.alphapose.utils.bbox import bbox_clip_xyxy, bbox_xywh_to_xyxy

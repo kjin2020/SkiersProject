@@ -31,7 +31,7 @@ class FastPose(nn.Module):
 
         # Imagenet pretrain model
         assert cfg['NUM_LAYERS'] in [18, 34, 50, 101, 152]
-        x = imagenet_resnet(cfg['NUM_LAYERS'])
+        x = imagenet_resnet(cfg['NUM_LAYERS'], pretrained=cfg.get('BACKBONE_PRETRAINED', True))
 
         model_state = self.preact.state_dict()
         state = {k: v for k, v in x.state_dict().items()

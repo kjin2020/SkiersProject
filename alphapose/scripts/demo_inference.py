@@ -13,9 +13,7 @@ from tqdm import tqdm
 import natsort
 
 from detector.apis import get_detector # Done
-from trackers.tracker_api import Tracker # Done
-from trackers.tracker_cfg import cfg as tcfg # Done
-from trackers import track # Done, is in __init__ file
+# Tracker (ReID weights, cython_bbox) is imported lazily in run_inference when POSE_TRACK is on.
 from alphapose.alphapose.models import builder # Done
 from alphapose.alphapose.utils.config import update_config # Done
 from alphapose.alphapose.utils.detector import DetectionLoader # Done
@@ -365,6 +363,9 @@ def run_inference(args_cfg):
     pose_model.load_state_dict(torch.load(args.checkpoint, map_location=args.device))
     pose_dataset = builder.retrieve_dataset(cfg.DATASET.TRAIN)
     if args.pose_track:
+        from trackers.tracker_api import Tracker
+        from trackers.tracker_cfg import cfg as tcfg
+        from trackers import track
         tracker = Tracker(tcfg, args)
     if len(args.gpus) > 1:
         pose_model = torch.nn.DataParallel(pose_model, device_ids=args.gpus).to(args.device)
